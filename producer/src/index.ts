@@ -11,12 +11,12 @@ process.argv.slice(2).forEach((msg) => {
 
 async function produceNotification(notificationMessage: string) {
   let connection: amqp.ChannelModel | null = null;
-  let channel: amqp.Channel | null = null;
+  let channel: amqp.ConfirmChannel | null = null;
 
   try {
     connection = await amqp.connect("amqp://localhost");
 
-    channel = await connection.createChannel();
+    channel = await connection.createConfirmChannel();
 
     await channel.assertExchange(
       "notifications_dead_letter_exchange",
@@ -43,12 +43,15 @@ async function produceNotification(notificationMessage: string) {
     channel.publish(
       "notifications_exchange",
       "notification.created",
-      Buffer.from(notificationMessage)
+      Buffer.from(notificationMessage),
+      { persistent: true }
     );
+
+    await channel.waitForConfirms();
 
     console.log(`Message sent to exchange: ${notificationMessage}`);
   } catch (error) {
-    console.error("Error producing message:", error);
+    console.error("Publish error:", error);
   } finally {
     await channel?.close();
     await connection?.close();
