@@ -1,4 +1,5 @@
 import amqp from "amqplib";
+import { withExponentialBackoff } from "./withExponentialBackoff.js";
 
 const MAX_RETRIES = 3;
 const CHANCE_OF_FAILURE = 0.7; // 70% chance of failure to simulate processing errors
@@ -8,8 +9,13 @@ consumeMessages().catch((error) => {
 });
 
 async function consumeMessages() {
-  const connection = await amqp.connect(
-    process.env.RABBIT_MQ_CONNECTION_STRING as string
+  const RABBIT_MQ_CONNECTON_RETRIES = 10;
+  const RABBIT_MQ_INITIAL_DELAY_MS = 1000;
+
+  const connection = await withExponentialBackoff(
+    () => amqp.connect(process.env.RABBIT_MQ_CONNECTION_STRING as string),
+    RABBIT_MQ_CONNECTON_RETRIES,
+    RABBIT_MQ_INITIAL_DELAY_MS
   );
 
   const channel = await connection.createChannel();
