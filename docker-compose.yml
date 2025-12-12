@@ -1,0 +1,43 @@
+services:
+  producer:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile.dev
+    container_name: producer
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./producer:/app
+      - /app/node_modules
+    command: npm run start:dev
+    tty: true
+  consumer:
+    build:
+      context: ./consumer
+      dockerfile: Dockerfile.dev
+    container_name: consumer
+    depends_on:
+      - rabbitmq
+      - producer
+    environment:
+      - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
+    volumes:
+      - ./consumer:/app
+      - /app/node_modules
+    command: npm run start:dev
+    tty: true
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+
+volumes:
+  rabbitmq_data:

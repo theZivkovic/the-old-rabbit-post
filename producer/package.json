@@ -16,11 +16,13 @@
   "type": "module",
   "devDependencies": {
     "@types/amqplib": "^0.10.8",
+    "@types/express": "^5.0.6",
     "concurrently": "^9.2.1",
     "nodemon": "^3.1.11",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "amqplib": "^0.10.9"
+    "amqplib": "^0.10.9",
+    "express": "^5.2.1"
   }
 }

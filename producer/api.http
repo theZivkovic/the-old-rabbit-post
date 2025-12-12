@@ -1,0 +1,13 @@
+### Dispatch Notification Message
+POST http://localhost:3000/notifications
+Content-Type: application/json
+
+{
+  "message": "Heey there!!!"
+}
+
+### Flush Notifications From Dead Letter Queue
+POST http://localhost:3000/notifications/flush-from-deadletter
+Content-Type: application/json
+
+{}

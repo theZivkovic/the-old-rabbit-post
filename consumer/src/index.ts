@@ -8,7 +8,10 @@ consumeMessages().catch((error) => {
 });
 
 async function consumeMessages() {
-  const connection = await amqp.connect("amqp://localhost");
+  const connection = await amqp.connect(
+    process.env.RABBIT_MQ_CONNECTION_STRING as string
+  );
+
   const channel = await connection.createChannel();
 
   await channel.assertExchange("notifications_dead_letter_exchange", "direct", {
@@ -69,7 +72,7 @@ function processMessage(channel: amqp.Channel, msg: amqp.ConsumeMessage) {
     console.log("Done processing message:", msg.content.toString());
     channel.ack(msg);
   } catch {
-    console.error("Error processing message:", msg.content.toString());
+    console.error("Error processing message: ", msg.content.toString());
     const retries = msg.properties.headers?.["x-retries"] || 0;
 
     if (retries < MAX_RETRIES) {

@@ -1,59 +1,41 @@
-// producer/src/index.ts
-// Producer script to send notification messages to RabbitMQ
-// Usage: npm run build && node ./dist/index.js "Your notification message here"
+import express, { type Request, type Response } from "express";
+import {
+  dispatchNotification,
+  flushNotificationsFromDeadletter,
+} from "./notifications.js";
 
-import amqp from "amqplib";
+const app = express();
 
-// Read messages from command line arguments and send them to the exchange
-process.argv.slice(2).forEach((msg) => {
-  produceNotification(msg);
-});
-
-async function produceNotification(notificationMessage: string) {
-  let connection: amqp.ChannelModel | null = null;
-  let channel: amqp.ConfirmChannel | null = null;
-
-  try {
-    connection = await amqp.connect("amqp://localhost");
-
-    channel = await connection.createConfirmChannel();
-
-    await channel.assertExchange(
-      "notifications_dead_letter_exchange",
-      "direct",
-      {
-        durable: true,
+app.post(
+  "/notifications",
+  express.json(),
+  async (req: Request, res: Response) => {
+    try {
+      const notificationMessage = req.body.message;
+      if (!notificationMessage) {
+        return res.status(400).send("Message is required");
       }
-    );
 
-    await channel.assertQueue("notifications_dead_letter_queue", {
-      durable: true,
-    });
-
-    await channel.bindQueue(
-      "notifications_dead_letter_queue",
-      "notifications_dead_letter_exchange",
-      "notification.failed"
-    );
-
-    await channel.assertExchange("notifications_exchange", "direct", {
-      durable: true,
-    });
-
-    channel.publish(
-      "notifications_exchange",
-      "notification.created",
-      Buffer.from(notificationMessage),
-      { persistent: true }
-    );
-
-    await channel.waitForConfirms();
-
-    console.log(`Message sent to exchange: ${notificationMessage}`);
-  } catch (error) {
-    console.error("Publish error:", error);
-  } finally {
-    await channel?.close();
-    await connection?.close();
+      await dispatchNotification(notificationMessage);
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).send("Internal Server Error");
+    }
   }
-}
+);
+
+app.post(
+  "/notifications/flush-from-deadletter",
+  async (req: Request, res: Response) => {
+    try {
+      await flushNotificationsFromDeadletter();
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Producer service is running.");
+});
