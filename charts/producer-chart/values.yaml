@@ -1,0 +1,11 @@
+replicaCount: 1
+
+image:
+  repository: rabbitmq-producer
+  tag: latest
+  pullPolicy: Never
+
+containerPort: 3000
+
+env:
+  RABBIT_MQ_CONNECTION_STRING: amqp://default_user_3ZCowrj7c_X9b9iJf-F:7lZhIO06ZesrPc1nVaiWSSqQgbWf1NO-@rabbitmq-mediator

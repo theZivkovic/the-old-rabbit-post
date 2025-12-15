@@ -5,7 +5,7 @@ metadata:
   labels:
     app: producer
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: producer
@@ -16,10 +16,10 @@ spec:
     spec:
       containers:
         - name: producer
-          image: rabbitmq-producer:latest
-          imagePullPolicy: Never
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 3000
+            - containerPort: {{.Values.containerPort }}
           env:
             - name: RABBIT_MQ_CONNECTION_STRING
-              value: amqp://default_user_3ZCowrj7c_X9b9iJf-F:7lZhIO06ZesrPc1nVaiWSSqQgbWf1NO-@rabbitmq-mediator
+              value: {{ .Values.env.RABBIT_MQ_CONNECTION_STRING }}
