@@ -1,0 +1,11 @@
+releases:
+  - name: producer-release
+    namespace: default
+    chart: ./producer-chart
+    values:
+      - ./producer-chart/values.yaml
+  - name: consumer-release
+    namespace: default
+    chart: ./consumer-chart
+    values:
+      - ./consumer-chart/values.yaml
