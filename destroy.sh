@@ -1,1 +1,0 @@
-cd charts && helmfile destroy && cd ..;
