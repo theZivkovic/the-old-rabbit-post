@@ -39,5 +39,5 @@ app.post(
 );
 
 app.listen(PORT, () => {
-  console.log(`Producer service is running on port ${PORT}.`);
+  console.log(`Ottos stand service is running on port ${PORT}.`);
 });

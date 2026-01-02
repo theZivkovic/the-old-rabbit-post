@@ -1,9 +1,9 @@
 services:
-  producer:
+  ottos-stand-service:
     build:
-      context: ./producer
+      context: ./ottos-stand-service
       dockerfile: Dockerfile.dev
-    container_name: producer
+    container_name: ottos-stand-service
     depends_on:
       - rabbitmq
     environment:
@@ -12,24 +12,24 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./producer:/app
+      - ./ottos-stand-service:/app
       - /app/node_modules
     command: npm run start:dev
     tty: true
-  consumer:
+  postman-service:
     build:
-      context: ./consumer
+      context: ./postman-service
       dockerfile: Dockerfile.dev
-    container_name: consumer
+    container_name: postman-service
     depends_on:
       - rabbitmq
-      - producer
+      - ottos-stand-service
     environment:
       - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
     ports:
       - "3001:3000"
     volumes:
-      - ./consumer:/app
+      - ./postman-service:/app
       - /app/node_modules
     command: npm run start:dev
     tty: true

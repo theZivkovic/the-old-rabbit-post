@@ -8,7 +8,7 @@ app.use(express.json());
 const consumerService = new ConsumerService();
 
 app.listen(PORT, () => {
-  console.log(`Consumer service is running on port ${PORT}.`);
+  console.log(`Postman service is running on port ${PORT}.`);
   consumerService.consumeMessages().catch((error) => {
     console.error("Error consuming messages:", error);
   });
