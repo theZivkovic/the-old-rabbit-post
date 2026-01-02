@@ -11,3 +11,7 @@ POST http://localhost:3000/notifications/flush-from-deadletter
 Content-Type: application/json
 
 {}
+
+### Get processed notifications
+GET http://localhost:3001/processed-messages
+Content-Type: application/json
