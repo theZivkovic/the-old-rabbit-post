@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 app.use(express.json());
+
 app.post(
   "/blue-book-entries",
   await buildValidationMiddleware(createBlueBookEntrySchema),
@@ -20,6 +21,19 @@ app.post(
         status: BlueBookEntryStatus.NEW,
       });
       res.status(201).json(createdBlueBookEntry);
+    } catch (error) {
+      console.error("Error processing request:", error);
+      next(error);
+    }
+  }
+);
+
+app.get(
+  "/blue-book-entries",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const blueBookEntries = await blueBookEntryRepository.getAll();
+      res.status(200).json(blueBookEntries);
     } catch (error) {
       console.error("Error processing request:", error);
       next(error);

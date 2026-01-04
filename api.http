@@ -1,5 +1,16 @@
-### Dispatch Notification Message
+### Create Blue Book Entry
 POST http://localhost:3000/blue-book-entries
+Content-Type: application/json
+
+{
+  "title": "Heey there",
+  "body": "This is notification message.",
+  "from_name": "Joana",
+  "to_name": "Agatha"
+}
+
+### Read all Blue Book Entries
+GET http://localhost:3000/blue-book-entries
 Content-Type: application/json
 
 {
