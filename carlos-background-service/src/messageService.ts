@@ -11,32 +11,28 @@ export async function dispatchMessages(messageObjs: Array<any>) {
 
     channel = await connection.createConfirmChannel();
 
-    await channel.assertExchange(
-      "notifications_dead_letter_exchange",
-      "direct",
-      {
-        durable: true,
-      }
-    );
+    await channel.assertExchange("dead_letter_exchange", "direct", {
+      durable: true,
+    });
 
-    await channel.assertQueue("notifications_dead_letter_queue", {
+    await channel.assertQueue("dead_letter_queue", {
       durable: true,
     });
 
     await channel.bindQueue(
-      "notifications_dead_letter_queue",
-      "notifications_dead_letter_exchange",
-      "notification.failed"
+      "dead_letter_queue",
+      "dead_letter_exchange",
+      "message.failed"
     );
 
-    await channel.assertExchange("notifications_exchange", "direct", {
+    await channel.assertExchange("messages_exchange", "direct", {
       durable: true,
     });
 
     messageObjs.forEach((messageObj) => {
       channel!.publish(
-        "notifications_exchange",
-        "notification.created",
+        "messages_exchange",
+        "message.created",
         Buffer.from(JSON.stringify(messageObj)),
         {persistent: true}
       );

@@ -21,7 +21,7 @@ Content-Type: application/json
 }
 
 ### Flush Notifications From Dead Letter Queue
-POST http://localhost:3000/notifications/flush-from-deadletter
+POST http://localhost:3000/messages/flush-from-deadletter
 Content-Type: application/json
 
 {}

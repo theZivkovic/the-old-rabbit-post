@@ -18,49 +18,45 @@ export class ConsumerService {
 
     const channel = await connection.createChannel();
 
-    await channel.assertExchange(
-      "notifications_dead_letter_exchange",
-      "direct",
-      {
-        durable: true,
-      }
-    );
+    await channel.assertExchange("dead_letter_exchange", "direct", {
+      durable: true,
+    });
 
-    await channel.assertQueue("notifications_dead_letter_queue", {
+    await channel.assertQueue("dead_letter_queue", {
       durable: true,
     });
 
     await channel.bindQueue(
-      "notifications_dead_letter_queue",
-      "notifications_dead_letter_exchange",
-      "notification.failed"
+      "dead_letter_queue",
+      "dead_letter_exchange",
+      "message.failed"
     );
 
-    await channel.assertExchange("notifications_exchange", "direct", {
+    await channel.assertExchange("messages_exchange", "direct", {
       durable: true,
     });
 
-    await channel.assertQueue("notifications_queue", {
+    await channel.assertQueue("messages_queue", {
       durable: true,
       arguments: {
-        "x-dead-letter-exchange": "notifications_dead_letter_exchange",
-        "x-dead-letter-routing-key": "notification.failed",
+        "x-dead-letter-exchange": "dead_letter_exchange",
+        "x-dead-letter-routing-key": "message.failed",
       },
     });
 
     await channel.bindQueue(
-      "notifications_queue",
-      "notifications_exchange",
-      "notification.created"
+      "messages_queue",
+      "messages_exchange",
+      "message.created"
     );
 
     console.log(
       "Waiting for messages in %s. To exit press CTRL+C",
-      "notifications_queue"
+      "messages_queue"
     );
 
     await channel.consume(
-      "notifications_queue",
+      "messages_queue",
       async (msg: amqp.ConsumeMessage | null) => {
         if (msg !== null) {
           this.processMessage(channel, msg);
@@ -98,12 +94,10 @@ export class ConsumerService {
           "x-retries": retries + 1,
         };
 
-        channel.publish(
-          "notifications_exchange",
-          "notification.created",
-          msg.content,
-          {headers, persistent: true}
-        );
+        channel.publish("messages_exchange", "message.created", msg.content, {
+          headers,
+          persistent: true,
+        });
 
         console.log(`Message requeued with retry count: ${retries + 1}`);
         channel.ack(msg);

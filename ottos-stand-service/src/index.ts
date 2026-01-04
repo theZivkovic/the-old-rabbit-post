@@ -1,5 +1,5 @@
 import express, {type NextFunction, type Request, type Response} from "express";
-import {flushNotificationsFromDeadletter} from "./notifications.js";
+import {flushMessagesFromDeadletter} from "./messagesService.js";
 import {buildValidationMiddleware} from "./validationMiddleware.js";
 import {createBlueBookEntrySchema} from "./validationSchemas.js";
 import {blueBookEntryRepository} from "./blueBookEntryRepository.js";
@@ -41,20 +41,20 @@ app.get(
   }
 );
 
-// app.post(
-//   "/notifications/flush-from-deadletter",
-//   async (req: Request, res: Response) => {
-//     try {
-//       await flushNotificationsFromDeadletter();
-//       res
-//         .status(200)
-//         .json({message: "Notifications flushed from dead letter queue"});
-//     } catch (error) {
-//       console.error("Error processing request:", error);
-//       res.status(500).send("Internal Server Error");
-//     }
-//   }
-// );
+app.post(
+  "/messages/flush-from-deadletter",
+  async (req: Request, res: Response) => {
+    try {
+      await flushMessagesFromDeadletter();
+      res
+        .status(200)
+        .json({message: "Notifications flushed from dead letter queue"});
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
 
 app.use(globalErrorHandlerMiddleware);
 
