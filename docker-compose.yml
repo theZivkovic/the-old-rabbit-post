@@ -1,4 +1,21 @@
 services:
+  old-rabbit-post-ui:
+    build:
+      context: ./old-rabbit-post-ui
+      dockerfile: Dockerfile.dev
+    container_name: old-rabbit-post-ui
+    depends_on:
+      - rabbitmq
+      - postgres_db
+      - ottos-stand-service
+      - carlos-background-service
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./old-rabbit-post-ui:/app
+      - /app/node_modules
+    command: npm run dev
+    tty: true
   ottos-stand-service:
     build:
       context: ./ottos-stand-service
