@@ -27,20 +27,20 @@ app.post(
   }
 );
 
-app.post(
-  "/notifications/flush-from-deadletter",
-  async (req: Request, res: Response) => {
-    try {
-      await flushNotificationsFromDeadletter();
-      res
-        .status(200)
-        .json({message: "Notifications flushed from dead letter queue"});
-    } catch (error) {
-      console.error("Error processing request:", error);
-      res.status(500).send("Internal Server Error");
-    }
-  }
-);
+// app.post(
+//   "/notifications/flush-from-deadletter",
+//   async (req: Request, res: Response) => {
+//     try {
+//       await flushNotificationsFromDeadletter();
+//       res
+//         .status(200)
+//         .json({message: "Notifications flushed from dead letter queue"});
+//     } catch (error) {
+//       console.error("Error processing request:", error);
+//       res.status(500).send("Internal Server Error");
+//     }
+//   }
+// );
 
 app.use(globalErrorHandlerMiddleware);
 
