@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "title": "Heey there",
-  "body": "This is a notification message.",
+  "body": "This is notification message.",
   "from_name": "Joana",
   "to_name": "Agatha"
 }

@@ -1,7 +1,9 @@
 export enum BlueBookEntryStatus {
   NEW = "NEW",
+  TAKEN_BY_CARLO = "TAKEN_BY_CARLO",
+  TAKEN_BY_POSTMAN = "TAKEN_BY_POSTMAN",
   BLOCKED = "BLOCKED",
-  COMPLETED = "COMPLETED",
+  DELIVERED = "DELIVERED",
 }
 
 export type BlueBookEntry = {

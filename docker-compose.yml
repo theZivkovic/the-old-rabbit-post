@@ -7,8 +7,8 @@ services:
     depends_on:
       - rabbitmq
     environment:
-      - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
       - PORT=3000
+      - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
       - POSTGRES_USER=myuser
       - POSTGRES_PASSWORD=mypassword
       - POSTGRES_DB=mydatabase
@@ -18,6 +18,25 @@ services:
       - "3000:3000"
     volumes:
       - ./ottos-stand-service:/app
+      - /app/node_modules
+    command: npm run start:dev
+    tty: true
+  carlos-background-service:
+    build:
+      context: ./carlos-background-service
+      dockerfile: Dockerfile.dev
+    container_name: carlos-background-service
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
+    volumes:
+      - ./carlos-background-service:/app
       - /app/node_modules
     command: npm run start:dev
     tty: true

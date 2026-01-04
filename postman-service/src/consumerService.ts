@@ -6,10 +6,6 @@ const {blueBookEntryRepository} = await import("./blueBookEntryRepository.js");
 const MAX_RETRIES = 3;
 
 export class ConsumerService {
-  getProcessedMessages() {
-    return blueBookEntryRepository.getAll();
-  }
-
   async consumeMessages() {
     const RABBIT_MQ_CONNECTON_RETRIES = 10;
     const RABBIT_MQ_INITIAL_DELAY_MS = 1000;
@@ -81,13 +77,15 @@ export class ConsumerService {
     console.log("Processing message:", msg.content.toString());
     const message = JSON.parse(msg.content.toString()) as BlueBookEntry;
     try {
-      await blueBookEntryRepository.create({
-        title: message.title,
-        body: message.body,
-        from_name: message.from_name,
-        to_name: message.to_name,
-        status: BlueBookEntryStatus.COMPLETED,
-      });
+      await blueBookEntryRepository.updateStatus(
+        message.id,
+        BlueBookEntryStatus.TAKEN_BY_POSTMAN
+      );
+      await this.waitFor(10000);
+      await blueBookEntryRepository.updateStatus(
+        message.id,
+        BlueBookEntryStatus.DELIVERED
+      );
       channel.ack(msg);
       console.log("Done processing message:", msg.content.toString());
     } catch {

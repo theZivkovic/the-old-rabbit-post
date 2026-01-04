@@ -5,6 +5,12 @@ import {pool} from "./db.js";
 const BlueBookEntryTable = "blue_book_entries";
 
 class BlueBookEntryRepository {
+  async getAll() {
+    const queryResult: QueryResult<BlueBookEntry> = await pool.query(
+      `SELECT * FROM ${BlueBookEntryTable}`
+    );
+    return queryResult.rows;
+  }
   async create(entry: Omit<BlueBookEntry, "id">) {
     const queryResult: QueryResult<BlueBookEntry> = await pool.query(
       `INSERT INTO ${BlueBookEntryTable} (title, body, from_name, to_name, status) 
