@@ -1,3 +1,16 @@
+x-base-postman-service: &base-postman-service
+  build:
+    context: ./postman-service
+    dockerfile: Dockerfile.dev
+  depends_on:
+    - rabbitmq
+    - ottos-stand-service
+  volumes:
+    - ./postman-service:/app
+    - /app/node_modules
+  command: npm run start:dev
+  tty: true
+
 services:
   old-rabbit-post-ui:
     build:
@@ -57,30 +70,76 @@ services:
       - /app/node_modules
     command: npm run start:dev
     tty: true
-  postman-service:
-    build:
-      context: ./postman-service
-      dockerfile: Dockerfile.dev
-    container_name: postman-service
-    depends_on:
-      - rabbitmq
-      - ottos-stand-service
+  postman-service-1:
+    <<: *base-postman-service
+    container_name: postman-service-1
+    ports:
+      - "3001:3000"
     environment:
+      - POSTMAN_NAME=Pete
       - PORT=3000
-      - POSTMAN_NAME=Postman Pete
       - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
       - POSTGRES_USER=myuser
       - POSTGRES_PASSWORD=mypassword
       - POSTGRES_DB=mydatabase
       - POSTGRES_HOST=postgres_db
       - POSTGRES_PORT=5432
+  postman-service-2:
+    <<: *base-postman-service
+    container_name: postman-service-2
     ports:
-      - "3001:3000"
-    volumes:
-      - ./postman-service:/app
-      - /app/node_modules
-    command: npm run start:dev
-    tty: true
+      - "3002:3000"
+    environment:
+      - POSTMAN_NAME=Paula
+      - PORT=3000
+      - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
+  postman-service-3:
+    <<: *base-postman-service
+    container_name: postman-service-3
+    ports:
+      - "3003:3000"
+    environment:
+      - POSTMAN_NAME=Penny
+      - PORT=3000
+      - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
+  postman-service-4:
+    <<: *base-postman-service
+    container_name: postman-service-4
+    ports:
+      - "3004:3000"
+    environment:
+      - POSTMAN_NAME=Patty
+      - PORT=3000
+      - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
+  postman-service-5:
+    <<: *base-postman-service
+    container_name: postman-service-5
+    ports:
+      - "3005:3000"
+    environment:
+      - POSTMAN_NAME=Prat
+      - PORT=3000
+      - RABBIT_MQ_CONNECTION_STRING=amqp://rabbitmq:5672
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
