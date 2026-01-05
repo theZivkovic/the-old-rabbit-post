@@ -1,17 +1,11 @@
 import {Application, Graphics, HTMLText} from "pixi.js";
 import {Button} from "@pixi/ui";
-import {BlueBookEntry} from "./blueBookEntry";
-
-async function getAllBlueBookEntries() {
-  const response = await fetch("http://localhost:3000/blue-book-entries");
-  if (!response.ok) {
-    throw new Error(`Failed to fetch: ${response.status}`);
-  }
-  return (await response.json()) as Array<BlueBookEntry>;
-}
+import {createBlueBookEntry, getAllBlueBookEntries} from "./apiClient";
+import {BlueBookEntry, BlueBookEntryStatus} from "./blueBookEntry";
 
 (async () => {
   const app = new Application();
+  let blueBookEntries: Array<BlueBookEntry> = [];
   await app.init({background: "#1099bb", resizeTo: window});
 
   document.getElementById("pixi-container")!.appendChild(app.canvas);
@@ -20,7 +14,7 @@ async function getAllBlueBookEntries() {
 
   // add otto's stand
   const ottosStand = new HTMLText({
-    text: "👦",
+    text: `👦 ${blueBookEntries.filter((x) => x.status === BlueBookEntryStatus.NEW).length}`,
     style: {
       fontFamily: "Arial",
       fontSize: 72,
@@ -45,9 +39,10 @@ async function getAllBlueBookEntries() {
   app.stage.addChild(carlosPost);
 
   // add postmans
+  const postmans: Array<HTMLText> = [];
   const postmanPadding = 100;
   const postmanNames = ["Pete", "Paula", "Penny", "Patty", "Prat"];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < postmanNames.length; i++) {
     const postman = new HTMLText({
       text: `👮🏻 ${postmanNames[i]}`,
       style: {
@@ -62,12 +57,15 @@ async function getAllBlueBookEntries() {
       postmanPadding +
         (app.screen.height - 2 * postmanPadding) * ((i + 1) / 6.0)
     );
+    postmans.push(postman);
     app.stage.addChild(postman);
   }
 
   const button = new Button(new Graphics().rect(0, 0, 100, 50).fill(0xffffff));
 
-  button.onPress.connect(() => alert("Button pressed!"));
+  button.onPress.connect(async () => {
+    await createBlueBookEntry();
+  });
 
   app.stage.addChild(button.view!);
 
@@ -77,8 +75,18 @@ async function getAllBlueBookEntries() {
     appTimer += time.deltaMS;
     if (appTimer > 1000) {
       appTimer -= 1000;
-      //const blueBookEntries = await getAllBlueBookEntries();
-      //console.log("Blue Book Entries:", blueBookEntries);
+      blueBookEntries = await getAllBlueBookEntries();
+      ottosStand.text = `👦 ${blueBookEntries.filter((x) => x.status === BlueBookEntryStatus.NEW).length}`;
+      carlosPost.text = `🧙 ${blueBookEntries.filter((x) => x.status === BlueBookEntryStatus.TAKEN_BY_CARLO).length}`;
+      postmans.forEach((postman, index) => {
+        postman.text = `👮🏻 ${postmanNames[index]}: ${
+          blueBookEntries.filter(
+            (x) =>
+              x.status === BlueBookEntryStatus.TAKEN_BY_POSTMAN &&
+              x.delivering_by === postmanNames[index]
+          ).length
+        }`;
+      });
     }
   });
 })();
