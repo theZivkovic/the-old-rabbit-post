@@ -1,20 +1,26 @@
-import {Application, Assets, HTMLText, Sprite} from "pixi.js";
+import {Application, Graphics, HTMLText} from "pixi.js";
+import {Button} from "@pixi/ui";
+import {BlueBookEntry} from "./blueBookEntry";
+
+async function getAllBlueBookEntries() {
+  const response = await fetch("http://localhost:3000/blue-book-entries");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch: ${response.status}`);
+  }
+  return (await response.json()) as Array<BlueBookEntry>;
+}
 
 (async () => {
-  // Create a new application
   const app = new Application();
-
-  // Initialize the application
   await app.init({background: "#1099bb", resizeTo: window});
 
-  // Append the application canvas to the document body
   document.getElementById("pixi-container")!.appendChild(app.canvas);
 
-  // Load the bunny texture
-  const texture = await Assets.load("/assets/bunny.png");
+  //✉️
 
-  const html = new HTMLText({
-    text: "👦👮🏻🧙✉️",
+  // add otto's stand
+  const ottosStand = new HTMLText({
+    text: "👦",
     style: {
       fontFamily: "Arial",
       fontSize: 72,
@@ -22,28 +28,57 @@ import {Application, Assets, HTMLText, Sprite} from "pixi.js";
       align: "center",
     },
   });
+  ottosStand.position.set(app.screen.width / 4, app.screen.height / 2);
+  app.stage.addChild(ottosStand);
 
-  html.position.set(app.screen.width / 2 - 50, 20);
+  // add carlo's stand
+  const carlosPost = new HTMLText({
+    text: "🧙",
+    style: {
+      fontFamily: "Arial",
+      fontSize: 72,
+      fill: "#ff1010",
+      align: "center",
+    },
+  });
+  carlosPost.position.set(app.screen.width / 2, app.screen.height / 2);
+  app.stage.addChild(carlosPost);
 
-  app.stage.addChild(html);
+  // add postmans
+  const postmanPadding = 100;
+  const postmanNames = ["Pete", "Paula", "Penny", "Patty", "Prat"];
+  for (let i = 0; i < 5; i++) {
+    const postman = new HTMLText({
+      text: `👮🏻 ${postmanNames[i]}`,
+      style: {
+        fontFamily: "Arial",
+        fontSize: 48,
+        fill: "white",
+        align: "center",
+      },
+    });
+    postman.position.set(
+      (3 * app.screen.width) / 4.0,
+      postmanPadding +
+        (app.screen.height - 2 * postmanPadding) * ((i + 1) / 6.0)
+    );
+    app.stage.addChild(postman);
+  }
 
-  // Create a bunny Sprite
-  const bunny = new Sprite(texture);
+  const button = new Button(new Graphics().rect(0, 0, 100, 50).fill(0xffffff));
 
-  // Center the sprite's anchor point
-  bunny.anchor.set(0.5);
+  button.onPress.connect(() => alert("Button pressed!"));
 
-  // Move the sprite to the center of the screen
-  bunny.position.set(app.screen.width / 2, app.screen.height / 2);
+  app.stage.addChild(button.view!);
 
-  // Add the bunny to the stage
-  app.stage.addChild(bunny);
+  let appTimer = 0;
 
-  // Listen for animate update
-  app.ticker.add((time) => {
-    // Just for fun, let's rotate mr rabbit a little.
-    // * Delta is 1 if running at 100% performance *
-    // * Creates frame-independent transformation *
-    bunny.rotation += 0.1 * time.deltaTime;
+  app.ticker.add(async (time) => {
+    appTimer += time.deltaMS;
+    if (appTimer > 1000) {
+      appTimer -= 1000;
+      //const blueBookEntries = await getAllBlueBookEntries();
+      //console.log("Blue Book Entries:", blueBookEntries);
+    }
   });
 })();

@@ -1,4 +1,5 @@
 import express, {type NextFunction, type Request, type Response} from "express";
+import cors from "cors";
 import {flushMessagesFromDeadletter} from "./messagesService.js";
 import {buildValidationMiddleware} from "./validationMiddleware.js";
 import {createBlueBookEntrySchema} from "./validationSchemas.js";
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.post(
   "/blue-book-entries",
