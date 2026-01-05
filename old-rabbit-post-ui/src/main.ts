@@ -75,6 +75,7 @@ function formatCharacterText(iconEmoji: string, name: string, count: number) {
 
   button.onPress.connect(async () => {
     await createBlueBookEntry();
+    await refreshBlueBookEntries();
   });
 
   app.stage.addChild(button.view!);
@@ -85,31 +86,34 @@ function formatCharacterText(iconEmoji: string, name: string, count: number) {
     appTimer += time.deltaMS;
     if (appTimer > 1000) {
       appTimer -= 1000;
-      blueBookEntries = await getAllBlueBookEntries();
-      ottosStand.text = formatCharacterText(
-        "👦",
-        "Otto",
-        blueBookEntries.filter((x) => x.status === BlueBookEntryStatus.NEW)
-          .length
-      );
-      carlosPost.text = formatCharacterText(
-        "🧙",
-        "Carlo",
-        blueBookEntries.filter(
-          (x) => x.status === BlueBookEntryStatus.TAKEN_BY_CARLO
-        ).length
-      );
-      postmans.forEach((postman, index) => {
-        postman.text = formatCharacterText(
-          "👮🏻",
-          postmanNames[index],
-          blueBookEntries.filter(
-            (x) =>
-              x.status === BlueBookEntryStatus.TAKEN_BY_POSTMAN &&
-              x.delivering_by === postmanNames[index]
-          ).length
-        );
-      });
+      await refreshBlueBookEntries();
     }
   });
+
+  async function refreshBlueBookEntries() {
+    blueBookEntries = await getAllBlueBookEntries();
+    ottosStand.text = formatCharacterText(
+      "👦",
+      "Otto",
+      blueBookEntries.filter((x) => x.status === BlueBookEntryStatus.NEW).length
+    );
+    carlosPost.text = formatCharacterText(
+      "🧙",
+      "Carlo",
+      blueBookEntries.filter(
+        (x) => x.status === BlueBookEntryStatus.TAKEN_BY_CARLO
+      ).length
+    );
+    postmans.forEach((postman, index) => {
+      postman.text = formatCharacterText(
+        "👮🏻",
+        postmanNames[index],
+        blueBookEntries.filter(
+          (x) =>
+            x.status === BlueBookEntryStatus.TAKEN_BY_POSTMAN &&
+            x.delivering_by === postmanNames[index]
+        ).length
+      );
+    });
+  }
 })();
