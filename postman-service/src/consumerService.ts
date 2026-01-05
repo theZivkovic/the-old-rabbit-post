@@ -1,9 +1,10 @@
 import amqp from "amqplib";
 import {withExponentialBackoff} from "./withExponentialBackoff.js";
-import {BlueBookEntryStatus, type BlueBookEntry} from "./blueBookEntry.js";
+import {type BlueBookEntry} from "./blueBookEntry.js";
 const {blueBookEntryRepository} = await import("./blueBookEntryRepository.js");
 
 const MAX_RETRIES = 3;
+const CHANCE_OF_SUCCESSFULL_DELIVERY = 0.7;
 
 export class ConsumerService {
   async consumeMessages() {
@@ -74,7 +75,7 @@ export class ConsumerService {
     const message = JSON.parse(msg.content.toString()) as BlueBookEntry;
     try {
       await blueBookEntryRepository.setTakenByPostman(message.id);
-      await this.waitFor(10000);
+      await this.fakeSendEmailUnreliably();
       await blueBookEntryRepository.setDelivered(message.id);
       channel.ack(msg);
       console.log("Done processing message:", msg.content.toString());
@@ -103,6 +104,13 @@ export class ConsumerService {
         channel.reject(msg, false);
       }
     } finally {
+    }
+  }
+
+  private async fakeSendEmailUnreliably() {
+    await this.waitFor(Math.random() * 2000 + 8000); // wait from 8 to 10 seconds
+    if (Math.random() > CHANCE_OF_SUCCESSFULL_DELIVERY) {
+      throw new Error("Simulated delivery failure");
     }
   }
 
