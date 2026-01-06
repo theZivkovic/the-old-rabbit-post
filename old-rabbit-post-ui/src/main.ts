@@ -2,6 +2,7 @@ import {Application, FederatedPointerEvent, HTMLText} from "pixi.js";
 import {Button} from "@pixi/ui";
 import {createBlueBookEntry, getAllBlueBookEntries} from "./apiClient";
 import {BlueBookEntryStatus} from "./blueBookEntry";
+import {debounce} from "./debounce";
 
 function formatCharacterText(iconEmoji: string, name: string, count: number) {
   return count === 0
@@ -87,6 +88,11 @@ function createSendButton(
   const app = new Application();
   await app.init({background: "#1099bb", resizeTo: window});
 
+  const debouncedPress = debounce(async () => {
+    await createBlueBookEntry();
+    await refreshBlueBookEntries();
+  }, 200);
+
   document.getElementById("pixi-container")!.appendChild(app.canvas);
 
   const postmanNames = ["Pete", "Paula", "Penny", "Patty", "Prat"];
@@ -95,10 +101,7 @@ function createSendButton(
   const carlosPost = createCarlosPost(app);
   const postmans = createPostmans(app, postmanNames);
 
-  const sendButton = createSendButton(app, async () => {
-    await createBlueBookEntry();
-    await refreshBlueBookEntries();
-  });
+  const sendButton = createSendButton(app, debouncedPress);
 
   app.stage.addChild(ottosStand);
   app.stage.addChild(carlosPost);
